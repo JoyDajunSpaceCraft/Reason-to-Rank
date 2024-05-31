@@ -1,0 +1,13 @@
+jupyter                            1.0.0
+jupyter-client                     7.4.9
+jupyter-console                    6.4.0
+jupyter-core                       5.7.2
+jupyter-events                     0.10.0
+jupyter-lsp                        2.2.4
+jupyter-packaging                  0.7.12
+jupyter-server                     2.14.0
+jupyter-server-terminals           0.5.3
+jupyterlab-pygments                0.1.2
+jupyterlab-server                  2.27.1
+jupyterlab-widgets                 1.0.0
+keyring                            22.3.0
