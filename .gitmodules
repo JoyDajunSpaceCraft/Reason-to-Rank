@@ -1,0 +1,3 @@
+[submodule "evaluation/BRIGHT"]
+	path = evaluation/BRIGHT
+	url = https://github.com/xlang-ai/BRIGHT.git
