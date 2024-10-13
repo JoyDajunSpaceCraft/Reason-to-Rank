@@ -51,6 +51,16 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-1. Data Preparation
-Place your datasets in the data/ directory. The datasets should follow the format described in the Datasets section.
-2. 
+
+### 1. Data Preparation
+
+Place your datasets in the `data/` directory. The datasets should follow the format described in the [Datasets](#datasets) section.
+
+### 2. Training
+
+To train a student model with Reason-to-Rank, run the following command:
+
+```bash
+python train.py --config config.yaml
+```
+
