@@ -4,7 +4,7 @@ This repository contains the code and datasets for our paper **"Reason-to-Rank: 
 
 ## Table of Contents
 
-- [Introduction](#introduction) d
+- [Introduction](#introduction)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
