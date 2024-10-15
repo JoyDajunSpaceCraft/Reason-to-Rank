@@ -7,7 +7,6 @@ This repository contains the code and datasets for our paper **"Reason-to-Rank: 
 - [Introduction](#introduction)
 - [Features](#features)
 - [Installation](#installation)
-- [Usage](#usage)
 - [Datasets](#datasets)
 - [Training](#training)
 - [Evaluation](#evaluation)
@@ -39,31 +38,41 @@ Create a virtual environment and install the dependencies:
 pip install -r requirements.txt
 ```
 
-## Usage
+## Datasets
 
-### 1. Data Preparation
+### 1. Teacher Data Preparation
 
 Place your datasets in the `data/` directory. The datasets should follow the format described in the [Datasets](#datasets) section.
 
-### 2. Training
+```
+python preprare_reason_rank/Differet Teacher Models/multi_rank.py --topic msmarco20 --prompt_type compare_direct
+```
+
+We have three teacher models and can change the name to use.
+Here the topic contains the `topic` in the table 1 and table 5, and the `prompt_type` has three level `compare`, `direct` and `compare_direct`. 
+### 2. Evaluation Teacher 
+Evaluate the teacher model's generation:
+
+```bash
+python evaluate.py --teacher_file teacher_output.jsonl --ndcg 10
+```
+
+The file name here `teacher_file` should be matched with the generated result path. 
+
+##  Training
 
 To train a student model with Reason-to-Rank, run the following command:
 
 ```bash
-python train.py --config config.yaml
+python script/train.py --model_id llama3_8B --model_type llama --train_path train_data/msmarco_1000.jsonl --eval_path train_data/validation/listwise_msmarco20_test_5_pid.jsonl --device cuda:0
 ```
 
-## Datasets
 
-### Prepare dataset
+##  Evaluation
 
-The option for the datatype is three `combine`, `pointwise` and `compare` reflect to the different reasoning types in the paper.
 
-```
-python prepare_reason_rank/multi_rank.py --datatype combine
+```bash
+python scripts/inference.py --save_name "PEFT_rank_mistral" --model_id "mistral_7B_v0.3" --eval_type "touche" --ndcg 5
 ```
 
-### BM25 dataset prepare 
-
-We also add the BM25 generated result in the place of /data
 
