@@ -33,20 +33,9 @@ Our framework leverages large language models (LLMs) as teacher models to genera
 
 To install and set up the project locally, follow these steps:
 
-1. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/JoyDajunSpaceCraft/Distillation-Is-All-You-Need.git
-   cd Distillation-Is-All-You-Need
-   ```
-2. **Install the required dependencies**:
+1. **Install the required dependencies**:
 Create a virtual environment and install the dependencies:
 ```
-python -m venv venv
-source venv/bin/activate  # For Linux/MacOS
-# or
-.\venv\Scripts\activate   # For Windows
-
 pip install -r requirements.txt
 ```
 
@@ -63,4 +52,18 @@ To train a student model with Reason-to-Rank, run the following command:
 ```bash
 python train.py --config config.yaml
 ```
+
+## Datasets
+
+### Prepare dataset
+
+The option for the datatype is three `combine`, `pointwise` and `compare` reflect to the different reasoning types in the paper.
+
+```
+python prepare_reason_rank/multi_rank.py --datatype combine
+```
+
+### BM25 dataset prepare 
+
+We also add the BM25 generated result in the place of /data
 

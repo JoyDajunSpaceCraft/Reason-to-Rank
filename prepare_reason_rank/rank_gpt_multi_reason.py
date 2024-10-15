@@ -139,22 +139,67 @@ def run_retriever(topics, searcher, qrels=None, k=100, qid=None):
                     'content': content,
                     'qid': qid, 'docid': hit.docid, 'rank': rank, 'score': hit.score})
     return ranks
-
-
 def get_prefix_prompt(query, num):
-    return [{'role': 'system',
-             'content': "You are RankGPT, an intelligent assistant that can rank passages based on their relevancy to the query."},
-            {'role': 'user',
-             'content': f"I will provide you with {num} passages, each indicated by number identifier []. \nRank the passages based on their relevance to query: {query}. And give me the reason why you rank them that way."},
-            {'role': 'assistant', 'content': 'Okay, please provide the passages.'}]
+    return [
+        {
+            'role': 'system',
+            'content': "You are RankGPT, an intelligent assistant that can rank passages based on their relevancy to the query."
+        },
+        {
+            'role': 'user',
+            'content': (
+                f"I will provide you with {num} passages, each indicated by a number identifier [].\n"
+                "For each passage, briefly generate your reasoning process as follows:\n"
+                "1. Judge whether the passage is not applicable (not very common), where the query does not meet the premise of the passage.\n"
+                "2. Check if the query contains direct evidence. If so, judge whether the query meets or does not meet the passage.\n"
+                "3. If there is no direct evidence, try to infer from existing evidence and answer one question: If the passage is ranked in this order, is it possible that a good passage will miss such information? If impossible, then you can assume that the passage should not be ranked in that order. Otherwise, it should be ranked in that order.\n"
+                "Then, read every passage one-by-one and find the sentence where the method is the direct answer for the query and output the sentence.\n"
+                "Then, rank the passages based on their relevance to the query.\n"
+                "Give highest priority to passages that provide a clear and direct definition or explanation of the keywords related to the query.\n"
+                "Consider both the detailed information and any relevant background context provided in each passage.\n"
+                "Provide clear and concise reasons for the ranking, highlighting the specific parts of the passages that influenced your decision.\n"
+                "Make sure to ignore any irrelevant information and focus on content directly related to the query.\n"
+                "In addition to direct reasons for ranking each passage, also consider listwise reasons. A listwise reason involves comparing passages with each other to determine their relative importance. Specifically, compare passages to identify which ones provide more comprehensive, relevant, and accurate information in relation to the query. When providing listwise reasons, mention specific comparative insights, such as why one passage might be more relevant than another based on the overall context and detail provided."
+            )
+        },
+        {
+            'role': 'assistant',
+            'content': 'Okay, please provide the passages.'
+        }
+    ]
 
 
 def get_post_prompt(query, num):
-    # return f"Search Query: {query}. \nRank the {num} passages above based on their relevance to the search query. The passages should be listed in descending order using identifiers. The most relevant passages should be listed first. The output format should be [] > [], e.g., [1] > [2]. Only response the ranking results, do not say any word or explain."
-    return f"Search Query: {query}. \nRank the {num} passages above based on their relevance to the search query. The passages should be listed in descending order using identifiers. The most relevant passages should be listed first. The output format should be [] > [], e.g., [1] > [2]. And give me the reason why you rank them that way."
+    return (
+        f"Search Query: {query}.\n"
+        f"Rank the {num} passages above based on their relevance to the search query and the extracted keywords. The passages should be listed in descending order using identifiers. The most relevant passages should be listed first.\n"
+        "The output should be in JSON format with the following structure, representing rerank results:\n"
+        "{\n"
+        "  \"ranked_passages\": [\n"
+        "    {\n"
+        "      \"identifier\": int,\n"
+        "      \"direct_reason\": str,\n"
+        "      \"listwise_reason\": str,\n"
+        "      \"direct_answer_sentence\": str\n"
+        "    },\n"
+        "    ...\n"
+        "  ]\n"
+        "}\n"
+        "For each passage, provide the extracted keywords and detailed reasons for its ranking. Ensure to separate direct reasons and listwise reasons clearly. Mention specific parts of the passage that influenced your decision. Ensure the reasons are clear, concise, and directly related to the query, balancing direct definitions or explanations and relevant background information. Only output the JSON structured format."
+    )
+
+# Example usage
+query = "What are the benefits of a ketogenic diet?"
+num_passages = 5
+
+prefix_prompt = get_prefix_prompt(query, num_passages)
+post_prompt = get_post_prompt(query, num_passages)
+
+# print(prefix_prompt)
+# print(post_prompt)
 
 
-def create_permutation_instruction(item=None, rank_start=0, rank_end=100, model_name='gpt-3.5-turbo'):
+def create_permutation_instruction(item=None, rank_start=0, rank_end=100, model_name='gpt-4'):
     query = item['query']
     # print("rank_start in  create_permutation_instruction",rank_start)
     # print("len(item['hits'])", len(item['hits']))
@@ -195,16 +240,7 @@ def run_llm(messages, api_key=None, model_name="gpt-3.5-turbo"):
     return response
 
 
-# def clean_response(response: str):
-#     new_response = ''
-#     for c in response:
-#         if not c.isdigit():
-#             new_response += ' '
-#         else:
-#             new_response += c
-#     new_response = new_response.strip()
-#     print("new_response", new_response)
-#     return new_response
+
 def clean_response(response: str):
     # 找到第一次出现的排名序列
     ranking_pattern = re.findall(r'\[\d+\] >', response)
